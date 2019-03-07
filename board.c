@@ -4,9 +4,9 @@
 #define TRUE 1
 #define FALSE 0
 
-void printBoard(int, char p1[3][25], char p2[3][25], struct state *);
+void printBoard(int, struct state *);
 void initialiseState(struct state **, int);
-void start(struct state **);
+void start(struct state **, int);
 
 struct state {
     int player;
@@ -15,33 +15,43 @@ struct state {
 };
 
 
-
+char p1[3][25] = {" o o o ", " o   o ", " o o o "};
+char p2[3][25] = {" x   x ", "   x   ", " x   x "};
 
 int main(void){
     int size, i, j;
     struct state *game_state;
-    char p1[3][25] = {" o o o ", " o   o ", " o o o "};
-    char p2[3][25] = {" x   x ", "   x   ", " x   x "};
+    
     printf("enter size of board\n");
     scanf("%d", &size);
     initialiseState(&game_state, size);
-    game_state -> board[1][1] = 2;
-    printBoard(size, p1, p2,  game_state);
+    printBoard(size, game_state);
     
 
-    //start(&game_state);
+    start(&game_state, size);
     return 0;
 }
 
-void start(struct state **game_state){
+void start(struct state **game_state, int size){
     int finished = FALSE;
+    int x,y;
     while (finished == FALSE){
-
+        printf("player %d, enter your move, grid is %d by %d", (*game_state) -> player, size, size);
+        scanf("%d%d", &x, &y);
+        (*game_state) -> board[x-1][y-1] = (*game_state) -> player;
+        if ((*game_state) -> player == 1){
+            (*game_state) -> player = 2;
+        }else{
+            (*game_state) -> player = 1;
+        }
+        printBoard(size, (*game_state) );
+        
     }
+    printf ("coords are x: %d and y %d", x,y);
 }
 
 //creates a visual board in the terminal based on the size input the user has given 
-void printBoard(int size, char p1[3][25],  char p2[3][25], struct state *game_state){
+void printBoard(int size, struct state *game_state){
     int i, boardCount =0;
     char line[9] = "--------";
     for (i=0; i<(size*4) - 1 ; i++){ //i represents each row of output
@@ -76,6 +86,7 @@ void printBoard(int size, char p1[3][25],  char p2[3][25], struct state *game_st
         }
         
     }
+    printf("\n\n----------------------------------------------------");
 }
 
 void initialiseState(struct state **game_state, int boardSize){
@@ -88,7 +99,7 @@ void initialiseState(struct state **game_state, int boardSize){
     }
     for (i =0; i<boardSize; i++){
         for (j=0; j<boardSize; j++){
-            (*game_state) -> board[i][j] = 1;
+            (*game_state) -> board[i][j] = 0;
         }
     }
 
