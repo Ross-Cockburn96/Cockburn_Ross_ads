@@ -9,6 +9,7 @@ void initialiseState(struct state **, int);
 void start(struct state **, int);
 int gameFinished(struct state *, int);
 int checkRows(struct state *, int);
+int checkColumns(struct state *, int);
 int checkDiagonals(struct state *, int);
 
 struct state
@@ -76,6 +77,9 @@ int gameFinished(struct state *gameState, int size)
         return 1;
     }
     else{
+        if (checkColumns(gameState, size) == TRUE){
+            return 1;
+        } 
         return 0;
     }
     // else{
@@ -114,6 +118,31 @@ int checkRows(struct state *gameState, int size){
             if (matchCount == size){
 
                 return TRUE; //this is a winning row 
+            }
+        }
+    }
+    return FALSE;
+}
+
+int checkColumns(struct state *gameState, int size){
+    int i,j, marker, matchCount;
+    int **ptr = (gameState -> board);
+
+    //loop checking matches on columns
+    for (i=0; i<size; i++){
+        marker = *(*(ptr)+i); //this is the first marker on every column
+        if (marker == 0){
+            continue; //if the first marker on the column is empty then skip to the next row
+        }
+        matchCount =0; 
+        for (j=0; j<size; j++){
+            if (*(*(ptr+j)+i) != marker){ //each element in the column 
+                break;
+            }else{
+                matchCount++;
+            }
+            if (matchCount == size){
+                return TRUE;
             }
         }
     }
