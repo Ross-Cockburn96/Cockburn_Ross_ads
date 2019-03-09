@@ -66,82 +66,97 @@ void start(struct state **game_state, int size)
             (*game_state)->player = 1;
         }
         printBoard(size, (*game_state));
-        
     }
     printf("coords are x: %d and y %d", x, y);
 }
 
 int gameFinished(struct state *gameState, int size)
 {
-    if (checkRows(gameState, size) == TRUE){
+    if (checkRows(gameState, size) == TRUE)
+    {
         return 1;
     }
-    else{
-        if (checkColumns(gameState, size) == TRUE){
+    else
+    {
+        if (checkColumns(gameState, size) == TRUE)
+        {
             return 1;
-        } 
-        return 0;
+        }
+        else
+        {
+            if (checkDiagonals(gameState, size) == TRUE)
+            {
+                return 1;
+            }
+            return 0;
+        }
     }
-    // else{
-    //     if (checkDiagonals(gameState, size) == TRUE){
-    //         return 1;
-    //     }
-    // }
-    // int i, j;
-    // for (i = 0; i < size; i++)
-    // {
-    //     return;
-    // }
 }
 
-int checkRows(struct state *gameState, int size){
-    int i,j, marker, matchCount;
-    int **ptr = (gameState -> board);
-    
+int checkRows(struct state *gameState, int size)
+{
+    int i, j, marker, matchCount;
+    int **ptr = (gameState->board);
+
     //loop checking matches on rows
-    for (i=0; i<size; i++){
-        marker = **(ptr+i); //this is the first marker on every row
-        if (marker == 0 ){
-            continue; //if the first marker on the row is empty skip to the next row. 
+    for (i = 0; i < size; i++)
+    {
+        marker = **(ptr + i); //this is the first marker on every row
+        if (marker == 0)
+        {
+            continue; //if the first marker on the row is empty skip to the next row.
         }
         //printf("marker is %d\n", marker);
         matchCount = 0; //this will be equal to the size of the board if there is a winning row
-        for (j=0; j<size; j++){
-            if (*(*(ptr + i)+j) != marker){ //this is each element in the row 
+        for (j = 0; j < size; j++)
+        {
+            if (*(*(ptr + i) + j) != marker)
+            { //this is each element in the row
                 //printf("%d is not = to marker\n" ,*(*(ptr + i)+j) );
                 break; //if one of the elements is not equal to the marker then there is no point checking the rest in this row
-            }else{  
+            }
+            else
+            {
                 //printf("value %d is = to marker\n", *(*(ptr+i)+j));
                 matchCount++;
                 //printf("%d is number of matches\n", matchCount);
             }
-            if (matchCount == size){
+            if (matchCount == size)
+            {
 
-                return TRUE; //this is a winning row 
+                return TRUE; //this is a winning row
             }
         }
     }
     return FALSE;
 }
 
-int checkColumns(struct state *gameState, int size){
-    int i,j, marker, matchCount;
-    int **ptr = (gameState -> board);
+int checkColumns(struct state *gameState, int size)
+{
+    int i, j, marker, matchCount;
+    int **ptr = (gameState->board);
 
     //loop checking matches on columns
-    for (i=0; i<size; i++){
-        marker = *(*(ptr)+i); //this is the first marker on every column
-        if (marker == 0){
+    for (i = 0; i < size; i++)
+    {
+        marker = *(*(ptr) + i); //this is the first marker on every column
+        if (marker == 0)
+        {
             continue; //if the first marker on the column is empty then skip to the next row
         }
-        matchCount =0; 
-        for (j=0; j<size; j++){
-            if (*(*(ptr+j)+i) != marker){ //each element in the column 
+        matchCount = 0;
+        for (j = 0; j < size; j++)
+        {
+            if (*(*(ptr + j) + i) != marker)
+            { //each element in the column
                 break;
-            }else{
+            }
+            else
+            {
                 matchCount++;
             }
-            if (matchCount == size){
+            if (matchCount == size)
+            {
                 return TRUE;
             }
         }
@@ -149,8 +164,54 @@ int checkColumns(struct state *gameState, int size){
     return FALSE;
 }
 
-int checkDiagonals(struct state *gameState, int size){
+int checkDiagonals(struct state *gameState, int size)
+{
+    int i, marker, matchCount;
+    int **ptr = (gameState->board);
+    marker = **(ptr); //marker is the top left marker on board
+    if (marker != 0)
+    {
+        matchCount =0;
+        for (i = 0; i < size; i++)
+        {
+            if (*(*(ptr + i) + i) != marker) //check the left -> right diagonal 
+            {
+                break;
+            }
+            else
+            {
+                matchCount++;
+            }
+            if (matchCount == size)
+            {
+                return TRUE;
+            }
+        }
+    }
+    marker = *(*(ptr)+size-1); //marker is top right marker on board
+    if (marker != 0)
+    {
+        matchCount =0;
+        for (i=0; i<size; i++)
+        {
+            printf("value is %d\n",*(*(ptr + i) +size-(i+1) ));
+            if (*(*(ptr + i) +size-(i+1)) != marker) //check the right -> left diagonal 
+            {
+                break;
+            }
+            else
+            {
+                matchCount++;
+            }
+            if (matchCount == size)
+            {
+                return TRUE;
+            }
+        }
+    }
 
+    return FALSE;
+    
 }
 //creates a visual board in the terminal based on the size input the user has given
 void printBoard(int size, struct state *game_state)
@@ -222,5 +283,4 @@ void initialiseState(struct state **game_state, int boardSize)
             (*game_state)->board[i][j] = 0;
         }
     }
-    
 }
