@@ -29,8 +29,10 @@ int main(void)
     printf("enter size of board\n");
     scanf("%d", &size);
     initialiseState(&game_state, size);
+    system("cls");
     printBoard(size, game_state);
 
+    
     start(&game_state, size);
     return 0;
 }
@@ -39,35 +41,47 @@ void start(struct state **game_state, int size)
 {
     int finished = FALSE;
     int x, y;
+    int *square;
     while (finished == FALSE)
     {
         printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, size, size);
         scanf("%d%d", &x, &y);
-        (*game_state)->board[x - 1][y - 1] = (*game_state)->player;
+        
+        square = &(*game_state) -> board[x-1][y-1];
+        if (*square == 0){
+            *square = (*game_state) ->player;
+            int moveEffect = gameFinished((*game_state), size);
+            if (moveEffect == 1)
+            {
+                printf("player %d wins\n", (*game_state)->player);
+                finished = TRUE;
+                break;
+            }
+            if (moveEffect == 2)
+            {
+                printf("draw\n");
+                break;
+            }
 
-        int moveEffect = gameFinished((*game_state), size);
-        if (moveEffect == 1)
-        {
-            printf("player %d wins", (*game_state)->player);
-            finished = TRUE;
-        }
-        if (moveEffect == 2)
-        {
-            printf("draw");
-        }
-
-        //switch player after turn is made
-        if ((*game_state)->player == 1)
-        {
-            (*game_state)->player = 2;
+            //switch player after turn is made
+            if ((*game_state)->player == 1)
+            {
+                (*game_state)->player = 2;
+            }
+            else
+            {
+                (*game_state)->player = 1;
+            }
+            system("cls");
+            printBoard(size, (*game_state));
         }
         else
-        {
-            (*game_state)->player = 1;
+        {   
+
+            printf("that square is occupied, choose another square\n");
         }
-        printBoard(size, (*game_state));
+        
     }
-    printf("coords are x: %d and y %d", x, y);
 }
 
 int gameFinished(struct state *gameState, int size)
@@ -194,7 +208,6 @@ int checkDiagonals(struct state *gameState, int size)
         matchCount =0;
         for (i=0; i<size; i++)
         {
-            printf("value is %d\n",*(*(ptr + i) +size-(i+1) ));
             if (*(*(ptr + i) +size-(i+1)) != marker) //check the right -> left diagonal 
             {
                 break;
