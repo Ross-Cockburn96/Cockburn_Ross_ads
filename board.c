@@ -8,7 +8,7 @@
 
 void printBoard(int, struct state *);
 void initialiseState(struct state **, int);
-void start(struct state **, int);
+void start(struct state **, struct moveHistory **, int);
 int gameFinished(struct state *, int);
 int checkRows(struct state *, int);
 int checkColumns(struct state *, int);
@@ -31,18 +31,17 @@ int main(void)
     printf("enter size of board\n");
     scanf("%d", &size);
     initialiseState(&game_state, size);
-    printf("initialised");
-    //history -> current_state = game_state;
-    display();
+    printf("initialised\n");
+    printf("initialised history\n");
     //system("cls");
     printBoard(size, game_state);
 
     
-    start(&game_state, size);
+    start(&game_state, &history, size);
     return 0;
 }
 
-void start(struct state **game_state, int size)
+void start(struct state **game_state, struct moveHistory ** history, int size)
 {
     int finished = FALSE;
     int x, y;
@@ -53,6 +52,8 @@ void start(struct state **game_state, int size)
         scanf("%d%d", &x, &y);
         
         square = &(*game_state) -> board[x-1][y-1];
+        updateHistory (history, (*game_state));
+        display((*history));
         if (*square == 0){
             *square = (*game_state) ->player;
             int moveEffect = gameFinished((*game_state), size);
@@ -77,7 +78,7 @@ void start(struct state **game_state, int size)
             {
                 (*game_state)->player = 1;
             }
-            system("cls");
+            //system("cls");
             printBoard(size, (*game_state));
         }
         else
