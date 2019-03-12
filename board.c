@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "state.h"
+#include "moveHistory.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -12,11 +14,9 @@ int checkRows(struct state *, int);
 int checkColumns(struct state *, int);
 int checkDiagonals(struct state *, int);
 
-struct state
-{
-    int player;
-    int **board;
-};
+
+
+
 
 char p1[3][25] = {" o o o ", " o   o ", " o o o "};
 char p2[3][25] = {" x   x ", "   x   ", " x   x "};
@@ -25,11 +25,16 @@ int main(void)
 {
     int size, i, j;
     struct state *game_state;
+    struct moveHistory *history;
+    history = NULL;
 
     printf("enter size of board\n");
     scanf("%d", &size);
     initialiseState(&game_state, size);
-    system("cls");
+    printf("initialised");
+    //history -> current_state = game_state;
+    display();
+    //system("cls");
     printBoard(size, game_state);
 
     
