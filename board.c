@@ -2,17 +2,12 @@
 #include <stdio.h>
 #include "state.h"
 #include "moveHistory.h"
+#include "board.h"
 
 #define TRUE 1
 #define FALSE 0
 
-void printBoard(int, struct state *);
-void initialiseState(struct state **, int);
-void start(struct state **, struct moveHistory **, int);
-int gameFinished(struct state *, int);
-int checkRows(struct state *, int);
-int checkColumns(struct state *, int);
-int checkDiagonals(struct state *, int);
+
 
 
 
@@ -20,43 +15,49 @@ int checkDiagonals(struct state *, int);
 
 char p1[3][25] = {" o o o ", " o   o ", " o o o "};
 char p2[3][25] = {" x   x ", "   x   ", " x   x "};
+int boardSize;
 
 int main(void)
 {
-    int size, i, j;
+    int i, j;
     struct state *game_state;
     struct moveHistory *history;
     history = NULL;
 
     printf("enter size of board\n");
-    scanf("%d", &size);
-    initialiseState(&game_state, size);
+    scanf("%d", &boardSize);
+    initialiseState(&game_state);
     printf("initialised\n");
+    
     printf("initialised history\n");
     //system("cls");
-    printBoard(size, game_state);
+    printBoard(game_state);
 
     
-    start(&game_state, &history, size);
+    start(&game_state, &history );
     return 0;
 }
 
-void start(struct state **game_state, struct moveHistory ** history, int size)
+void start(struct state **game_state, struct moveHistory ** history)
 {
     int finished = FALSE;
     int x, y;
     int *square;
+    char ans[1];
     while (finished == FALSE)
     {
-        printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, size, size);
+        display((*history));
+        printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
         scanf("%d%d", &x, &y);
         
         square = &(*game_state) -> board[x-1][y-1];
-        updateHistory (history, (*game_state));
-        display((*history));
+        
         if (*square == 0){
-            *square = (*game_state) ->player;
-            int moveEffect = gameFinished((*game_state), size);
+            updateHistory (history, (*game_state));
+            *square = (*game_state) ->player; //change value of board to whatever player's shot it is 
+            
+            display((*history));
+            int moveEffect = gameFinished((*game_state));
             if (moveEffect == 1)
             {
                 printf("player %d wins\n", (*game_state)->player);
@@ -68,18 +69,25 @@ void start(struct state **game_state, struct moveHistory ** history, int size)
                 printf("draw\n");
                 break;
             }
-
-            //switch player after turn is made
-            if ((*game_state)->player == 1)
-            {
-                (*game_state)->player = 2;
-            }
-            else
-            {
-                (*game_state)->player = 1;
-            }
+        
+            
             //system("cls");
-            printBoard(size, (*game_state));
+            printBoard((*game_state));
+            printf ("Would you like to enter rewind mode?\n y/n ");
+            scanf ("%s", ans);
+            if (strcmp(ans, "y") ==0){
+                rewind(game_state, history);
+            }else{
+                //switch player after turn is made
+                if ((*game_state)->player == 1)
+                {
+                    (*game_state)->player = 2;
+                }
+                else
+                {
+                    (*game_state)->player = 1;
+                }
+            }
         }
         else
         {   
@@ -90,21 +98,47 @@ void start(struct state **game_state, struct moveHistory ** history, int size)
     }
 }
 
-int gameFinished(struct state *gameState, int size)
+void rewind(struct state **game_state, struct moveHistory **move_history)
+{      
+    char c[3];
+    int finished = FALSE;
+    printf("player is %d\n", (*game_state) -> player);
+    while (finished == FALSE){
+        printf ("Enter R to redo, U to undo a move and F to finish", (*game_state) -> player);
+        scanf ("%s", c);
+        if (strcmp(c, "U") ==0){
+            undo(game_state, move_history);
+            printf("player is now %d\n", (*game_state) -> player);
+            printBoard((*game_state));
+        }
+        if (strcmp(c, "F") ==0){
+            finished = TRUE;
+        }
+    }
+    
+}
+
+void undo(struct state **game_state, struct moveHistory **move_history){
+    struct state *prevState;
+    prevState = (*move_history) -> prev -> current_state;
+    *move_history = (*move_history) -> prev;
+    *game_state = prevState;
+}
+int gameFinished(struct state *gameState)
 {
-    if (checkRows(gameState, size) == TRUE)
+    if (checkRows(gameState ) == TRUE)
     {
         return 1;
     }
     else
     {
-        if (checkColumns(gameState, size) == TRUE)
+        if (checkColumns(gameState ) == TRUE)
         {
             return 1;
         }
         else
         {
-            if (checkDiagonals(gameState, size) == TRUE)
+            if (checkDiagonals(gameState ) == TRUE)
             {
                 return 1;
             }
@@ -113,13 +147,13 @@ int gameFinished(struct state *gameState, int size)
     }
 }
 
-int checkRows(struct state *gameState, int size)
+int checkRows(struct state *gameState)
 {
     int i, j, marker, matchCount;
     int **ptr = (gameState->board);
 
     //loop checking matches on rows
-    for (i = 0; i < size; i++)
+    for (i = 0; i < boardSize; i++)
     {
         marker = **(ptr + i); //this is the first marker on every row
         if (marker == 0)
@@ -128,7 +162,7 @@ int checkRows(struct state *gameState, int size)
         }
         //printf("marker is %d\n", marker);
         matchCount = 0; //this will be equal to the size of the board if there is a winning row
-        for (j = 0; j < size; j++)
+        for (j = 0; j < boardSize; j++)
         {
             if (*(*(ptr + i) + j) != marker)
             { //this is each element in the row
@@ -141,7 +175,7 @@ int checkRows(struct state *gameState, int size)
                 matchCount++;
                 //printf("%d is number of matches\n", matchCount);
             }
-            if (matchCount == size)
+            if (matchCount == boardSize)
             {
 
                 return TRUE; //this is a winning row
@@ -151,13 +185,13 @@ int checkRows(struct state *gameState, int size)
     return FALSE;
 }
 
-int checkColumns(struct state *gameState, int size)
+int checkColumns(struct state *gameState)
 {
     int i, j, marker, matchCount;
     int **ptr = (gameState->board);
 
     //loop checking matches on columns
-    for (i = 0; i < size; i++)
+    for (i = 0; i < boardSize; i++)
     {
         marker = *(*(ptr) + i); //this is the first marker on every column
         if (marker == 0)
@@ -165,7 +199,7 @@ int checkColumns(struct state *gameState, int size)
             continue; //if the first marker on the column is empty then skip to the next row
         }
         matchCount = 0;
-        for (j = 0; j < size; j++)
+        for (j = 0; j < boardSize; j++)
         {
             if (*(*(ptr + j) + i) != marker)
             { //each element in the column
@@ -175,7 +209,7 @@ int checkColumns(struct state *gameState, int size)
             {
                 matchCount++;
             }
-            if (matchCount == size)
+            if (matchCount == boardSize)
             {
                 return TRUE;
             }
@@ -184,7 +218,7 @@ int checkColumns(struct state *gameState, int size)
     return FALSE;
 }
 
-int checkDiagonals(struct state *gameState, int size)
+int checkDiagonals(struct state *gameState)
 {
     int i, marker, matchCount;
     int **ptr = (gameState->board);
@@ -192,7 +226,7 @@ int checkDiagonals(struct state *gameState, int size)
     if (marker != 0)
     {
         matchCount =0;
-        for (i = 0; i < size; i++)
+        for (i = 0; i < boardSize; i++)
         {
             if (*(*(ptr + i) + i) != marker) //check the left -> right diagonal 
             {
@@ -202,19 +236,19 @@ int checkDiagonals(struct state *gameState, int size)
             {
                 matchCount++;
             }
-            if (matchCount == size)
+            if (matchCount == boardSize)
             {
                 return TRUE;
             }
         }
     }
-    marker = *(*(ptr)+size-1); //marker is top right marker on board
+    marker = *(*(ptr)+boardSize-1); //marker is top right marker on board
     if (marker != 0)
     {
         matchCount =0;
-        for (i=0; i<size; i++)
+        for (i=0; i<boardSize; i++)
         {
-            if (*(*(ptr + i) +size-(i+1)) != marker) //check the right -> left diagonal 
+            if (*(*(ptr + i) +boardSize-(i+1)) != marker) //check the right -> left diagonal 
             {
                 break;
             }
@@ -222,7 +256,7 @@ int checkDiagonals(struct state *gameState, int size)
             {
                 matchCount++;
             }
-            if (matchCount == size)
+            if (matchCount == boardSize)
             {
                 return TRUE;
             }
@@ -233,12 +267,12 @@ int checkDiagonals(struct state *gameState, int size)
     
 }
 //creates a visual board in the terminal based on the size input the user has given
-void printBoard(int size, struct state *game_state)
+void printBoard(struct state *game_state)
 {
     printf("\n\n");
     int i, boardCount = 0;
     char line[9] = "--------";
-    for (i = 0; i < (size * 4) - 1; i++)
+    for (i = 0; i < (boardSize * 4) - 1; i++)
     { //i represents each row of output
         int j;
         if (i % 4 == 0 && i != 0)
@@ -248,7 +282,7 @@ void printBoard(int size, struct state *game_state)
         if (i % 4 == 3)
         {
             printf("-");
-            for (j = 0; j < size; j++)
+            for (j = 0; j < boardSize; j++)
             { //j represents a column of output (column is 8 characters wide)
                 printf("%s", line);
             }
@@ -256,7 +290,7 @@ void printBoard(int size, struct state *game_state)
         }
         else
         {
-            for (j = 0; j < size - 1; j++)
+            for (j = 0; j < boardSize - 1; j++)
             {
                 if (game_state->board[boardCount][j] == 0)
                 {
@@ -285,21 +319,23 @@ void printBoard(int size, struct state *game_state)
     printf("\n\n----------------------------------------------------\n");
 }
 
-void initialiseState(struct state **game_state, int boardSize)
+void initialiseState(struct state **game_state)
 {
     int i, j;
     *game_state = (struct state *)malloc(sizeof(game_state));
     (*game_state)->player = 1;
-    (*game_state)->board = (int **)malloc(boardSize * sizeof(int **));
+    (*game_state)->board = initBoard((*game_state) -> board);
+}
+
+int **initBoard (int **board){
+    int i,j;
+    board = (int **) malloc(boardSize * sizeof(int *));
     for (i = 0; i < boardSize; i++)
     {
-        (*game_state)->board[i] = (int *)malloc(boardSize * sizeof(int *));
-    }
-    for (i = 0; i < boardSize; i++)
-    {
-        for (j = 0; j < boardSize; j++)
-        {
-            (*game_state)->board[i][j] = 0;
+        board[i] = (int *) malloc (boardSize * sizeof(int));
+        for (j=0; j< boardSize; j++){
+            board[i][j] = 0;
         }
     }
+   return board;
 }

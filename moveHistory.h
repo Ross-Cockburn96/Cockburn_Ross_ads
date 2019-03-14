@@ -2,8 +2,11 @@
 #include "state.h"
 #define MOVE_HISTORY_H
 
-void  display(struct moveHistory *);
+
+
+void display(struct moveHistory *);
 void updateHistory(struct moveHistory**, struct state*);
+void deepIntCopy(int **, int **);
 
 
 struct moveHistory
