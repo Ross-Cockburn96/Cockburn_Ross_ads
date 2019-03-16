@@ -53,7 +53,11 @@ void start(struct state **game_state, struct moveHistory ** history)
         square = &(*game_state) -> board[x-1][y-1];
         
         if (*square == 0){
+            *history = validateHistory(history);
+            printf("doing second validation");
+            validateHistory(history);
             *square = (*game_state) ->player; //change value of board to whatever player's shot it is 
+           
             updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
             
             display((*history));
@@ -340,4 +344,12 @@ int **initBoard (int **board){
         }
     }
    return board;
+}
+
+void freeBoard(int **board){
+    int i;
+    for (i = 0; i < boardSize; i++){
+        free(board[i]);
+    }
+    free (board);
 }

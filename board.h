@@ -13,5 +13,6 @@ int checkDiagonals(struct state *);
 void rewind(struct state **, struct moveHistory **);
 void undo (struct state **, struct moveHistory **);
 int **initBoard(int **);
+void freeBoard(int **);
 
 #endif

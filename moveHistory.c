@@ -7,6 +7,7 @@
 
 
 void display (struct moveHistory * history){
+    printf("displaying...\n");
     int i,j;
     while (history != NULL){
         printf("player to move is %d\n" , history -> current_state -> player);
@@ -63,6 +64,25 @@ void updateHistory (struct moveHistory **history, struct state *currentState) {
     current -> next = temp;
     *history = (*history) -> next; //point to the most recent move
 }
+
+//recursive function to prevent memory leak when overwriting history list
+struct moveHistory *validateHistory(struct moveHistory ** history){
+    int **histBoard = (*history)->current_state -> board;
+    if ((*history)-> next == NULL){
+        printf("next node is null\n");
+        return (*history);
+    }else{
+        printf("next node is not null\n");
+        freeBoard((*history) -> next -> current_state -> board);
+        free((*history) -> next -> current_state);
+        free(validateHistory((&((*history) -> next))));
+        (*history) -> next = NULL;
+        return (*history);
+    }
+}
+
+
+
 
 void deepIntCopy(int **newBoard, int **oldBoard){
     int i,j;
