@@ -7,6 +7,7 @@
 void display(struct moveHistory *);
 void updateHistory(struct moveHistory**, struct state*);
 void deepIntCopy(int **, int **);
+void initialiseHistory(struct moveHistory **);
 
 
 struct moveHistory

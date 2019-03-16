@@ -9,7 +9,7 @@
 void display (struct moveHistory * history){
     int i,j;
     while (history != NULL){
-        printf("player who moved is %d\n" , history -> current_state -> player);
+        printf("player to move is %d\n" , history -> current_state -> player);
         for (int i = 0; i < 3; i++){
             printf("value of board is %d\n", **((history -> current_state -> board) +i));
             for (int j = 0; j < 3; j ++){
@@ -23,15 +23,27 @@ void display (struct moveHistory * history){
     
 }
 
+void initialiseHistory(struct moveHistory ** history){
+    int **newBoard = NULL;
+    struct state *newState;
+    newState = (struct state *) malloc (sizeof(struct state)); 
+    newState -> player = 1;
+    (newState -> board) = initBoard(newBoard);
+
+    *history = (struct moveHistory *) malloc(sizeof(struct moveHistory));
+    (*history) -> prev = NULL;
+    (*history) -> current_state = newState;
+    (*history) -> next = NULL;
+}
 
 void updateHistory (struct moveHistory **history, struct state *currentState) {
     struct moveHistory *temp, *current = *history;
     struct state *newState;
     int i, j;
-    int **updatedBoard = NULL;
+    int **newBoard = NULL;
     newState = (struct state *) malloc (sizeof(struct state)); 
     newState -> player = currentState -> player;
-    (newState -> board) = initBoard(updatedBoard);
+    (newState -> board) = initBoard(newBoard);
     deepIntCopy(newState -> board, currentState -> board);
     
     for (int i = 0; i < 3; i++){
@@ -41,24 +53,15 @@ void updateHistory (struct moveHistory **history, struct state *currentState) {
         }
     }
 
-    if (*history == NULL){
-        *history = (struct moveHistory *) malloc(sizeof(struct moveHistory));
-        (*history) -> prev = NULL;
-        (*history) -> current_state = newState;
-        (*history) -> next = NULL;
+    while (current -> next != NULL){ //ensure we are at the most recent move
+    current = current -> next;
     }
-    else
-    {
-        while (current -> next != NULL){ //ensure we are at the most recent move
-        current = current -> next;
-        }
-        temp = (struct moveHistory *) malloc (sizeof(struct moveHistory));
-        temp -> current_state = newState; 
-        temp -> next = NULL;
-        temp -> prev = current;
-        current -> next = temp;
-        *history = (*history) -> next; //point to the most recent move
-    }
+    temp = (struct moveHistory *) malloc (sizeof(struct moveHistory));
+    temp -> current_state = newState; 
+    temp -> next = NULL;
+    temp -> prev = current;
+    current -> next = temp;
+    *history = (*history) -> next; //point to the most recent move
 }
 
 void deepIntCopy(int **newBoard, int **oldBoard){

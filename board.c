@@ -27,6 +27,7 @@ int main(void)
     printf("enter size of board\n");
     scanf("%d", &boardSize);
     initialiseState(&game_state);
+    initialiseHistory(&history);
     printf("initialised\n");
     
     printf("initialised history\n");
@@ -46,15 +47,14 @@ void start(struct state **game_state, struct moveHistory ** history)
     char ans[1];
     while (finished == FALSE)
     {
-        display((*history));
         printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
         scanf("%d%d", &x, &y);
         
         square = &(*game_state) -> board[x-1][y-1];
         
         if (*square == 0){
-            updateHistory (history, (*game_state));
             *square = (*game_state) ->player; //change value of board to whatever player's shot it is 
+            updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
             
             display((*history));
             int moveEffect = gameFinished((*game_state));
@@ -121,6 +121,8 @@ void rewind(struct state **game_state, struct moveHistory **move_history)
 void undo(struct state **game_state, struct moveHistory **move_history){
     struct state *prevState;
     prevState = (*move_history) -> prev -> current_state;
+    printf("new history is\n ");
+    display ((*move_history)->prev);
     *move_history = (*move_history) -> prev;
     *game_state = prevState;
 }
