@@ -38,7 +38,7 @@ int main(void)
     start(&game_state, &history );
     return 0;
 }
-
+//change this so we aren't passing states around, only the history and we access the state from the history structure
 void start(struct state **game_state, struct moveHistory ** history)
 {
     int finished = FALSE;
@@ -50,17 +50,17 @@ void start(struct state **game_state, struct moveHistory ** history)
         printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
         scanf("%d%d", &x, &y);
         
-        square = &(*game_state) -> board[x-1][y-1];
+        square = &((*game_state) -> board[x-1][y-1]);
         
         if (*square == 0){
             *history = validateHistory(history);
-            printf("doing second validation");
-            validateHistory(history);
+            // for (int i = 0; i < 3; i++){
+            //     for (int j = 0; j < 3; j ++){
+            //         printf("old board is %d\n", (*game_state)->board[i][j]);
+            //     }
+            // }
+      
             *square = (*game_state) ->player; //change value of board to whatever player's shot it is 
-           
-            updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
-            
-            display((*history));
             int moveEffect = gameFinished((*game_state));
             if (moveEffect == 1)
             {
@@ -73,7 +73,17 @@ void start(struct state **game_state, struct moveHistory ** history)
                 printf("draw\n");
                 break;
             }
-        
+            
+            if ((*game_state)->player == 1)
+            {
+                (*game_state)->player = 2;
+            }
+            else
+            {
+                (*game_state)->player = 1;
+            }
+            updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
+            
             
             //system("cls");
             printBoard((*game_state));
@@ -83,15 +93,9 @@ void start(struct state **game_state, struct moveHistory ** history)
                 rewind(game_state, history);
             }else{
                 //switch player after turn is made
-                if ((*game_state)->player == 1)
-                {
-                    (*game_state)->player = 2;
-                }
-                else
-                {
-                    (*game_state)->player = 1;
-                }
+                
             }
+            
         }
         else
         {   
@@ -125,10 +129,15 @@ void rewind(struct state **game_state, struct moveHistory **move_history)
 void undo(struct state **game_state, struct moveHistory **move_history){
     struct state *prevState;
     prevState = (*move_history) -> prev -> current_state;
-    printf("new history is\n ");
-    display ((*move_history)->prev);
     *move_history = (*move_history) -> prev;
-    *game_state = prevState;
+    deepIntCopy((*game_state) -> board, prevState -> board);
+    (*game_state) -> player = prevState -> player;
+    // if ((*game_state) -> player == 1){
+    //     (*game_state)->player = 2; //ensures the player's turn is not reset to previous players turn when undoing
+    // } else{
+    //     (*game_state) -> player = 1;
+    // }
+    
 }
 int gameFinished(struct state *gameState)
 {
@@ -275,6 +284,7 @@ int checkDiagonals(struct state *gameState)
 //creates a visual board in the terminal based on the size input the user has given
 void printBoard(struct state *game_state)
 {
+    int **test =game_state->board;
     printf("\n\n");
     int i, boardCount = 0;
     char line[9] = "--------";
@@ -299,7 +309,7 @@ void printBoard(struct state *game_state)
             for (j = 0; j < boardSize - 1; j++)
             {
                 if (game_state->board[boardCount][j] == 0)
-                {
+                {   
                     printf("\t|");
                 }
                 if (game_state->board[boardCount][j] == 1)
@@ -346,6 +356,7 @@ int **initBoard (int **board){
    return board;
 }
 
+//function to free the allocated space of a game board
 void freeBoard(int **board){
     int i;
     for (i = 0; i < boardSize; i++){

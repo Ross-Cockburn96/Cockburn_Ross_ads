@@ -12,7 +12,6 @@ void display (struct moveHistory * history){
     while (history != NULL){
         printf("player to move is %d\n" , history -> current_state -> player);
         for (int i = 0; i < 3; i++){
-            printf("value of board is %d\n", **((history -> current_state -> board) +i));
             for (int j = 0; j < 3; j ++){
                 printf("value of board is %d\n", *(*((history -> current_state -> board)+i)+j));
             }
@@ -38,6 +37,13 @@ void initialiseHistory(struct moveHistory ** history){
 }
 
 void updateHistory (struct moveHistory **history, struct state *currentState) {
+
+    // printf("in function\n");
+    // for (int i = 0; i < 3; i++){
+    //     for (int j = 0; j < 3; j ++){
+    //         printf("old board is %d\n", *(*(currentState->board)+i)+j);
+    //     }
+    // }
     struct moveHistory *temp, *current = *history;
     struct state *newState;
     int i, j;
@@ -47,32 +53,31 @@ void updateHistory (struct moveHistory **history, struct state *currentState) {
     (newState -> board) = initBoard(newBoard);
     deepIntCopy(newState -> board, currentState -> board);
     
-    for (int i = 0; i < 3; i++){
-        printf("newState is %d\n", **((newState -> board) +i));
-        for (int j = 0; j < 3; j ++){
-            printf("newState is %d\n", *(*((newState -> board)+i)+j));
-        }
-    }
+    // for (int i = 0; i < 3; i++){
+    //     for (int j = 0; j < 3; j ++){
+    //         printf("newState is %d\n", *(*((newState -> board)+i)+j));
+    //     }
+    // }
 
     while (current -> next != NULL){ //ensure we are at the most recent move
-    current = current -> next;
+        current = current -> next;
     }
+
     temp = (struct moveHistory *) malloc (sizeof(struct moveHistory));
     temp -> current_state = newState; 
     temp -> next = NULL;
     temp -> prev = current;
     current -> next = temp;
     *history = (*history) -> next; //point to the most recent move
+
 }
 
-//recursive function to prevent memory leak when overwriting history list
+//recursive function to prevent memory leak when overwriting a section of the history structure list
 struct moveHistory *validateHistory(struct moveHistory ** history){
     int **histBoard = (*history)->current_state -> board;
     if ((*history)-> next == NULL){
-        printf("next node is null\n");
         return (*history);
     }else{
-        printf("next node is not null\n");
         freeBoard((*history) -> next -> current_state -> board);
         free((*history) -> next -> current_state);
         free(validateHistory((&((*history) -> next))));
@@ -81,14 +86,11 @@ struct moveHistory *validateHistory(struct moveHistory ** history){
     }
 }
 
-
-
-
 void deepIntCopy(int **newBoard, int **oldBoard){
     int i,j;
-     for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j ++){
-            *(*(newBoard+i)+j) = *(*(oldBoard+i)+j); 
+     for (i = 0; i < 3; i++){
+        for (j = 0; j < 3; j ++){
+            newBoard[i][j] = oldBoard[i][j];
         }
     }
 }
