@@ -10,7 +10,7 @@ int gameFinished(struct state *);
 int checkRows(struct state *);
 int checkColumns(struct state *);
 int checkDiagonals(struct state *);
-void rewind(struct state **, struct moveHistory **);
+void rewindState(struct state **, struct moveHistory **);
 void undo (struct state **, struct moveHistory **);
 int **initBoard(int **);
 void freeBoard(int **);

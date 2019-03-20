@@ -1,8 +1,9 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include "moveHistory.h"
 #include "state.h"
 #include "board.h"
-#include <stdlib.h>
-#include <stdio.h>
+
 
 
 
@@ -19,14 +20,14 @@ void display (struct moveHistory * history){
         printf ("-------------------------------\n");
         history = history -> prev;
     }
-    
-    
+
+
 }
 
 void initialiseHistory(struct moveHistory ** history){
     int **newBoard = NULL;
     struct state *newState;
-    newState = (struct state *) malloc (sizeof(struct state)); 
+    newState = (struct state *) malloc (sizeof(struct state));
     newState -> player = 1;
     (newState -> board) = initBoard(newBoard);
 
@@ -48,11 +49,11 @@ void updateHistory (struct moveHistory **history, struct state *currentState) {
     struct state *newState;
     int i, j;
     int **newBoard = NULL;
-    newState = (struct state *) malloc (sizeof(struct state)); 
+    newState = (struct state *) malloc (sizeof(struct state));
     newState -> player = currentState -> player;
     (newState -> board) = initBoard(newBoard);
     deepIntCopy(newState -> board, currentState -> board);
-    
+
     // for (int i = 0; i < 3; i++){
     //     for (int j = 0; j < 3; j ++){
     //         printf("newState is %d\n", *(*((newState -> board)+i)+j));
@@ -64,7 +65,7 @@ void updateHistory (struct moveHistory **history, struct state *currentState) {
     }
 
     temp = (struct moveHistory *) malloc (sizeof(struct moveHistory));
-    temp -> current_state = newState; 
+    temp -> current_state = newState;
     temp -> next = NULL;
     temp -> prev = current;
     current -> next = temp;
