@@ -87,5 +87,14 @@ struct moveHistory *validateHistory(struct moveHistory ** history){
     }
 }
 
+void freeMoveHistoryStruc(struct moveHistory **history){
+    while ((*history) -> prev != NULL){
+        *history = (*history) -> prev;
+        freeBoard((*history) -> next -> current_state -> board);
+        free((*history) -> next -> current_state);
+        free ((*history) -> next);
+    }
+}
+
 
 

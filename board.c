@@ -9,11 +9,6 @@
 #define FALSE 0
 
 
-
-
-
-
-
 char p1[3][25] = {" o o o ", " o   o ", " o o o "};
 char p2[3][25] = {" x   x ", "   x   ", " x   x "};
 int boardSize;
@@ -22,6 +17,10 @@ int main(void)
 {
     struct state *game_state;
     struct moveHistory *history;
+    struct moveHistory **gameHistory;
+    gameHistory = (struct moveHistory **) malloc(sizeof(struct moveHistory*));
+    int games = 0;
+    char response[2];
     history = NULL;
     game_state = NULL;
 
@@ -38,6 +37,24 @@ int main(void)
 
     start(&game_state, &history );
     printf("end of game");
+    games++;
+    gameHistory[games] = (struct moveHistory *)malloc (sizeof(struct moveHistory));
+    gameHistory[games] = &(*history);
+    printf("play again?\n");
+    scanf("%s", response);
+
+    if (strcmp(response, "y") == 0){
+        //delete the game board and create a new one
+        freeBoard(game_state -> board);
+        int **newBoard = NULL;
+        game_state -> board = initBoard(newBoard);
+        game_state -> player = 1;
+        //don't free history space as it is being used by the gameHistory for game replaying 
+        history = NULL;
+        initialiseHistory(&history);
+        display(gameHistory[1]);
+        start(&game_state, &history);
+    }
     return 0;
 }
 //change this so we aren't passing states around, only the history and we access the state from the history structure
@@ -46,7 +63,7 @@ void start(struct state **game_state, struct moveHistory ** history)
     int finished = FALSE;
     int x, y;
     int *square;
-    char ans[1];
+    char ans[2];
     while (finished == FALSE)
     {
         printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);

@@ -13,9 +13,7 @@ void display(struct moveHistory *);
 void updateHistory(struct moveHistory**, struct state*);
 void initialiseHistory(struct moveHistory **);
 struct moveHistory *validateHistory(struct moveHistory**);
-
-
-
+void freeMoveHistoryStruc (struct moveHistory **);
 
 
 
