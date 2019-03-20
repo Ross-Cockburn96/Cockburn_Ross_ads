@@ -75,7 +75,7 @@ void start(struct state **game_state, struct moveHistory ** history)
                 printf("draw\n");
                 break;
             }
-
+            //mark who's turn it is next 
             if ((*game_state)->player == 1)
             {
                 (*game_state)->player = 2;
@@ -86,17 +86,15 @@ void start(struct state **game_state, struct moveHistory ** history)
             }
             updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
 
-
+            
             //system("cls");
             printBoard((*game_state));
             printf ("Would you like to enter rewind mode?\n y/n ");
             scanf ("%s", ans);
             if (strcmp(ans, "y") ==0){
                 rewindState(game_state, history);
-            }else{
-                //switch player after turn is made
-
             }
+            
 
         }
         else
@@ -113,9 +111,8 @@ void rewindState(struct state **game_state, struct moveHistory **move_history)
 {
     char c[3];
     int finished = FALSE;
-    printf("player is %d\n", (*game_state) -> player);
     while (finished == FALSE){
-        printf ("%d, Enter R to redo, U to undo a move and F to finish", (*game_state) -> player);
+        printf ("Enter R to redo, U to undo a move and F to finish");
         scanf ("%s", c);
         if (strcmp(c, "U") ==0){
             undo(game_state, move_history);
@@ -135,11 +132,7 @@ void undo(struct state **game_state, struct moveHistory **move_history){
     *move_history = (*move_history) -> prev;
     deepIntCopy((*game_state) -> board, prevState -> board);
     (*game_state) -> player = prevState -> player;
-    // if ((*game_state) -> player == 1){
-    //     (*game_state)->player = 2; //ensures the player's turn is not reset to previous players turn when undoing
-    // } else{
-    //     (*game_state) -> player = 1;
-    // }
+
 
 }
 int gameFinished(struct state *gameState)
@@ -364,4 +357,13 @@ void freeBoard(int **board){
         free(board[i]);
     }
     free (board);
+}
+
+void deepIntCopy(int **newBoard, int **oldBoard){
+    int i,j;
+     for (i = 0; i < boardSize; i++){
+        for (j = 0; j < boardSize; j ++){
+            newBoard[i][j] = oldBoard[i][j];
+        }
+    }
 }

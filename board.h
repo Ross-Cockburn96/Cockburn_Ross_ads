@@ -14,5 +14,6 @@ void rewindState(struct state **, struct moveHistory **);
 void undo (struct state **, struct moveHistory **);
 int **initBoard(int **);
 void freeBoard(int **);
+void deepIntCopy(int **, int **);
 
 #endif

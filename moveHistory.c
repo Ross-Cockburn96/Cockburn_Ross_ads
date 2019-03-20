@@ -87,12 +87,5 @@ struct moveHistory *validateHistory(struct moveHistory ** history){
     }
 }
 
-void deepIntCopy(int **newBoard, int **oldBoard){
-    int i,j;
-     for (i = 0; i < 3; i++){
-        for (j = 0; j < 3; j ++){
-            newBoard[i][j] = oldBoard[i][j];
-        }
-    }
-}
+
 
