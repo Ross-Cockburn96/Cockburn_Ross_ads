@@ -119,6 +119,11 @@ void rewindState(struct state **game_state, struct moveHistory **move_history)
             printf("player is now %d\n", (*game_state) -> player);
             printBoard((*game_state));
         }
+        if (strcmp(c, "R") == 0){
+            redo(game_state, move_history);
+            printf("player is now %d\n", (*game_state) -> player);
+            printBoard((*game_state));
+        }
         if (strcmp(c, "F") ==0){
             finished = TRUE;
         }
@@ -128,12 +133,28 @@ void rewindState(struct state **game_state, struct moveHistory **move_history)
 
 void undo(struct state **game_state, struct moveHistory **move_history){
     struct state *prevState;
-    prevState = (*move_history) -> prev -> current_state;
-    *move_history = (*move_history) -> prev;
-    deepIntCopy((*game_state) -> board, prevState -> board);
-    (*game_state) -> player = prevState -> player;
+    if ((*move_history) -> prev != NULL){
+        prevState = (*move_history) -> prev -> current_state;
+        *move_history = (*move_history) -> prev;
+        deepIntCopy((*game_state) -> board, prevState -> board);
+        (*game_state) -> player = prevState -> player;
+    }else{
+        printf("NO MOVES TO UNDO\n");
+    }
+    
+}
 
-
+void redo(struct state **game_state, struct moveHistory **move_history){
+    struct state *nextState;
+    if ((*move_history) -> next != NULL){
+        nextState = (*move_history) -> next -> current_state;
+        *move_history = (*move_history) -> next;
+        deepIntCopy((*game_state) -> board, nextState -> board);
+        (*game_state) -> player = nextState -> player;
+    }else{
+        printf("NO MOVES TO REDO\n");
+    }
+    
 }
 int gameFinished(struct state *gameState)
 {

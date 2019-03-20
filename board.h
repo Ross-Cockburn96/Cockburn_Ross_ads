@@ -12,8 +12,10 @@ int checkColumns(struct state *);
 int checkDiagonals(struct state *);
 void rewindState(struct state **, struct moveHistory **);
 void undo (struct state **, struct moveHistory **);
+void redo (struct state**, struct moveHistory **);
 int **initBoard(int **);
 void freeBoard(int **);
 void deepIntCopy(int **, int **);
+
 
 #endif
