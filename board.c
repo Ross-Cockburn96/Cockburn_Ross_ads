@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <windows.h>
 #include "state.h"
 #include "moveHistory.h"
 #include "board.h"
@@ -20,7 +21,7 @@ int main(void)
     struct moveHistory **gameHistory;
     gameHistory = (struct moveHistory **) malloc(sizeof(struct moveHistory*));
     int games = 0;
-    char response[2];
+    char response[2] = "";
     history = NULL;
     game_state = NULL;
 
@@ -28,36 +29,70 @@ int main(void)
     scanf("%d", &boardSize);
     initialiseState(&game_state);
     initialiseHistory(&history);
-    printf("initialised\n");
-
-    printf("initialised history\n");
-    //system("cls");
+    system("cls");
     printBoard(game_state);
-
-
     start(&game_state, &history );
-    printf("end of game");
-    games++;
-    gameHistory[games] = (struct moveHistory *)malloc (sizeof(struct moveHistory));
-    gameHistory[games] = &(*history);
-    printf("play again?\n");
-    scanf("%s", response);
+    printf("end of game\n");
+    while (strcmp(response, "n") != 0){
+        gameHistory[games] = (struct moveHistory *)malloc (sizeof(struct moveHistory));
+        gameHistory[games] = &(*history);
+        printf("play again?\n");
+        scanf("%s", response);
 
-    if (strcmp(response, "y") == 0){
-        //delete the game board and create a new one
-        freeBoard(game_state -> board);
-        int **newBoard = NULL;
-        game_state -> board = initBoard(newBoard);
-        game_state -> player = 1;
-        //don't free history space as it is being used by the gameHistory for game replaying 
-        history = NULL;
-        initialiseHistory(&history);
-        display(gameHistory[1]);
-        start(&game_state, &history);
+        if (strcmp(response, "y") == 0){
+            //delete the game board and create a new one
+            freeBoard(game_state -> board);
+            int **newBoard = NULL;
+            game_state -> board = initBoard(newBoard);
+            game_state -> player = 1;
+            //don't free history space as it is being used by the gameHistory for game replaying 
+            history = NULL;
+            initialiseHistory(&history);
+            system("cls");
+            printBoard(game_state);
+            start(&game_state, &history);
+        }else{
+            if (strcmp(response, "n") == 0){
+                char resp[2] = "";
+                while (strcmp(resp, "n")!=0){
+                    printf("do you want to replay a previous game?\n");
+                    scanf("%s", resp);
+                    if (strcmp(resp, "y") == 0){
+                        int gameNum = 0;
+                        printf("enter the number of the game you want to replay\n");
+                        for (int i = 0; i <= games; i++){
+                            printf("game %d\n", i+1);
+                        }
+                    scanf("%d", &gameNum);
+                    gameNum --;
+                    replayHistory(gameHistory[gameNum]);
+                    }
+                }
+               
+            }
+        }
+        games++;
     }
     return 0;
 }
-//change this so we aren't passing states around, only the history and we access the state from the history structure
+
+void replayHistory(struct moveHistory *gameHistory){
+    while (gameHistory -> prev != NULL){
+        gameHistory = gameHistory -> prev;
+    }
+    while (gameHistory -> next != NULL){
+        Sleep(1000);
+        system("cls");
+        printBoard(gameHistory -> current_state);
+        gameHistory = gameHistory -> next;
+        
+    }
+    Sleep(1000);
+    system("cls");
+    printBoard(gameHistory -> current_state);
+    
+}
+
 void start(struct state **game_state, struct moveHistory ** history)
 {
     int finished = FALSE;
@@ -80,18 +115,7 @@ void start(struct state **game_state, struct moveHistory ** history)
             // }
 
             *square = (*game_state) ->player; //change value of board to whatever player's shot it is
-            int moveEffect = gameFinished((*game_state));
-            if (moveEffect == 1)
-            {
-                printf("player %d wins\n", (*game_state)->player);
-                finished = TRUE;
-                break;
-            }
-            if (moveEffect == 2)
-            {
-                printf("draw\n");
-                break;
-            }
+            
             //mark who's turn it is next 
             if ((*game_state)->player == 1)
             {
@@ -102,9 +126,24 @@ void start(struct state **game_state, struct moveHistory ** history)
                 (*game_state)->player = 1;
             }
             updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
-
+            int moveEffect = gameFinished((*game_state));
+            if (moveEffect == 1)
+            {
+                system("cls");
+                printf("player %d wins\n", (*history)->prev->current_state->player);
+                finished = TRUE;
+                printBoard((*game_state));
+                break;
+            }
+            if (moveEffect == 2)
+            {   
+                system("cls");
+                printf("draw\n");
+                printBoard((*game_state));
+                break;
+            }
             
-            //system("cls");
+            system("cls");
             printBoard((*game_state));
             printf ("Would you like to enter rewind mode?\n y/n ");
             scanf ("%s", ans);
@@ -121,7 +160,7 @@ void start(struct state **game_state, struct moveHistory ** history)
         }
 
     }
-    printf("FINISHED");
+    printf("FINISHED\n");
 }
 
 void rewindState(struct state **game_state, struct moveHistory **move_history)

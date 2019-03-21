@@ -16,6 +16,7 @@ void redo (struct state**, struct moveHistory **);
 int **initBoard(int **);
 void freeBoard(int **);
 void deepIntCopy(int **, int **);
+void replayHistory(struct moveHistory *);
 
 
 #endif
