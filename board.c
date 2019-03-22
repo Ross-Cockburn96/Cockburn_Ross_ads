@@ -5,6 +5,7 @@
 #include "state.h"
 #include "moveHistory.h"
 #include "board.h"
+#include "minMax.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -29,7 +30,7 @@ int main(void)
     scanf("%d", &boardSize);
     initialiseState(&game_state);
     initialiseHistory(&history);
-    system("cls");
+    //system("cls");
     printBoard(game_state);
     start(&game_state, &history );
     printf("end of game\n");
@@ -101,62 +102,62 @@ void start(struct state **game_state, struct moveHistory ** history)
     char ans[2];
     while (finished == FALSE)
     {
-        printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
-        scanf("%d%d", &x, &y);
+        if ((*game_state) -> player ==2){
+            (*game_state) = minmax((*game_state), (*game_state)->player);
+            printf("finished");
+            updateHistory (history, (*game_state));
+        }else{
+            printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
+            scanf("%d%d", &x, &y);
+        
+            square = &((*game_state) -> board[x-1][y-1]);
+            if (*square == 0){
+                *history = validateHistory(history);
 
-        square = &((*game_state) -> board[x-1][y-1]);
+                *square = (*game_state) ->player; //change value of board to whatever player's shot it is
+                //mark who's turn it is next 
+                if ((*game_state)->player == 1)
+                {
+                    (*game_state)->player = 2;
+                }
+                else
+                {
+                    (*game_state)->player = 1;
+                }
+                updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
+                int moveEffect = gameFinished((*game_state), (*history)->prev->current_state->player);
+                if (moveEffect == 1)
+                {
+                    system("cls");
+                    printf("player %d wins\n", (*history)->prev->current_state->player);
+                    finished = TRUE;
+                    printBoard((*game_state));
+                    break;
+                }
+                if (moveEffect == 2)
+                {   
+                    system("cls");
+                    printf("draw\n");
+                    finished = TRUE;
+                    printBoard((*game_state));
+                    break;
+                }
+                
+                //system("cls");
+                printBoard((*game_state));
+                printf ("Would you like to enter rewind mode?\n y/n ");
+                scanf ("%s", ans);
+                if (strcmp(ans, "y") ==0){
+                    rewindState(game_state, history);
+                }
+                
 
-        if (*square == 0){
-            *history = validateHistory(history);
-            // for (int i = 0; i < 3; i++){
-            //     for (int j = 0; j < 3; j ++){
-            //         printf("old board is %d\n", (*game_state)->board[i][j]);
-            //     }
-            // }
-
-            *square = (*game_state) ->player; //change value of board to whatever player's shot it is
-            
-            //mark who's turn it is next 
-            if ((*game_state)->player == 1)
-            {
-                (*game_state)->player = 2;
             }
             else
             {
-                (*game_state)->player = 1;
-            }
-            updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
-            int moveEffect = gameFinished((*game_state));
-            if (moveEffect == 1)
-            {
-                system("cls");
-                printf("player %d wins\n", (*history)->prev->current_state->player);
-                finished = TRUE;
-                printBoard((*game_state));
-                break;
-            }
-            if (moveEffect == 2)
-            {   
-                system("cls");
-                printf("draw\n");
-                printBoard((*game_state));
-                break;
-            }
-            
-            system("cls");
-            printBoard((*game_state));
-            printf ("Would you like to enter rewind mode?\n y/n ");
-            scanf ("%s", ans);
-            if (strcmp(ans, "y") ==0){
-                rewindState(game_state, history);
-            }
-            
 
-        }
-        else
-        {
-
-            printf("that square is occupied, choose another square\n");
+                printf("that square is occupied, choose another square\n");
+            }
         }
 
     }
@@ -212,21 +213,21 @@ void redo(struct state **game_state, struct moveHistory **move_history){
     }
     
 }
-int gameFinished(struct state *gameState)
+int gameFinished(struct state *gameState, int player)
 {
-    if (checkRows(gameState ) == TRUE)
+    if (checkRows(gameState, player ) == TRUE)
     {
         return 1;
     }
     else
     {
-        if (checkColumns(gameState ) == TRUE)
+        if (checkColumns(gameState, player ) == TRUE)
         {
             return 1;
         }
         else
         {
-            if (checkDiagonals(gameState ) == TRUE)
+            if (checkDiagonals(gameState, player ) == TRUE)
             {
                 return 1;
             }
@@ -235,7 +236,7 @@ int gameFinished(struct state *gameState)
     }
 }
 
-int checkRows(struct state *gameState)
+int checkRows(struct state *gameState, int player)
 {
     int i, j, marker, matchCount;
     int **ptr = (gameState->board);
@@ -244,7 +245,7 @@ int checkRows(struct state *gameState)
     for (i = 0; i < boardSize; i++)
     {
         marker = **(ptr + i); //this is the first marker on every row
-        if (marker == 0)
+        if (marker == 0 || marker != player)
         {
             continue; //if the first marker on the row is empty skip to the next row.
         }
@@ -273,7 +274,7 @@ int checkRows(struct state *gameState)
     return FALSE;
 }
 
-int checkColumns(struct state *gameState)
+int checkColumns(struct state *gameState, int player)
 {
     int i, j, marker, matchCount;
     int **ptr = (gameState->board);
@@ -282,7 +283,7 @@ int checkColumns(struct state *gameState)
     for (i = 0; i < boardSize; i++)
     {
         marker = *(*(ptr) + i); //this is the first marker on every column
-        if (marker == 0)
+        if (marker == 0 || marker != player)
         {
             continue; //if the first marker on the column is empty then skip to the next row
         }
@@ -306,12 +307,12 @@ int checkColumns(struct state *gameState)
     return FALSE;
 }
 
-int checkDiagonals(struct state *gameState)
+int checkDiagonals(struct state *gameState, int player)
 {
     int i, marker, matchCount;
     int **ptr = (gameState->board);
     marker = **(ptr); //marker is the top left marker on board
-    if (marker != 0)
+    if (marker != 0 && marker == player)
     {
         matchCount =0;
         for (i = 0; i < boardSize; i++)
@@ -331,7 +332,7 @@ int checkDiagonals(struct state *gameState)
         }
     }
     marker = *(*(ptr)+boardSize-1); //marker is top right marker on board
-    if (marker != 0)
+    if (marker != 0 && marker == player)
     {
         matchCount =0;
         for (i=0; i<boardSize; i++)

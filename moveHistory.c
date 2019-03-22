@@ -39,12 +39,6 @@ void initialiseHistory(struct moveHistory ** history){
 
 void updateHistory (struct moveHistory **history, struct state *currentState) {
 
-    // printf("in function\n");
-    // for (int i = 0; i < 3; i++){
-    //     for (int j = 0; j < 3; j ++){
-    //         printf("old board is %d\n", *(*(currentState->board)+i)+j);
-    //     }
-    // }
     struct moveHistory *temp, *current = *history;
     struct state *newState;
     int i, j;
@@ -54,11 +48,6 @@ void updateHistory (struct moveHistory **history, struct state *currentState) {
     (newState -> board) = initBoard(newBoard);
     deepIntCopy(newState -> board, currentState -> board);
 
-    // for (int i = 0; i < 3; i++){
-    //     for (int j = 0; j < 3; j ++){
-    //         printf("newState is %d\n", *(*((newState -> board)+i)+j));
-    //     }
-    // }
 
     while (current -> next != NULL){ //ensure we are at the most recent move
         current = current -> next;

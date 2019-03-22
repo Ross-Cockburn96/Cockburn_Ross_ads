@@ -7,6 +7,7 @@ struct state
 {
     int player;
     int **board;
+    int score;
 };
 
 #endif
