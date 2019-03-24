@@ -103,9 +103,11 @@ void start(struct state **game_state, struct moveHistory ** history)
     while (finished == FALSE)
     {
         if ((*game_state) -> player ==2){
-            (*game_state) = minmax((*game_state), (*game_state)->player);
+            *game_state = minmax((*game_state), (*game_state)->player);
             printf("finished");
+            (*game_state) -> player =1;
             updateHistory (history, (*game_state));
+            printBoard((*game_state));
         }else{
             printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
             scanf("%d%d", &x, &y);
