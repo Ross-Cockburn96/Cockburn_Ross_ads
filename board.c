@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <windows.h>
 #include "state.h"
 #include "moveHistory.h"
@@ -21,6 +22,7 @@ int main(void)
     struct state *game_state;
     struct moveHistory *history;
     struct moveHistory **gameHistory;
+    srand(time(NULL));
     gameHistory = (struct moveHistory **) malloc(sizeof(struct moveHistory*));
     int games = 0;
     char response[2] = "";
@@ -30,13 +32,13 @@ int main(void)
 
     printf("enter size of board\n");
     scanf("%d", &boardSize);
-    if (boardSize <= 3){
-        printf("do you want to play against AI?(y/n)");
-        scanf("%s", response );
-        if (strcmp(response, "y") ==0){
-            aiOpponent = 1;
-        }
+
+    printf("do you want to play against AI?(y/n)");
+    scanf("%s", response );
+    if (strcmp(response, "y") ==0){
+        aiOpponent = 1;
     }
+
     initialiseState(&game_state);
     initialiseHistory(&history);
     system("cls");
@@ -116,25 +118,39 @@ void start(struct state **game_state, struct moveHistory ** history, int aiOppon
     char ans[2];
     while (finished == FALSE)
     {
-        if (((*game_state) -> player ==2) && (aiOpponent == 1)){
+        if (((*game_state) -> player ==2) && (aiOpponent == 1) && (boardSize <= 3)){
             *game_state = minmax((*game_state), (*game_state)->player);
         }else{
-            printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
-            scanf("%d%d", &x, &y);
-        
-            square = &((*game_state) -> board[x-1][y-1]);
-            if (*square == 0){
-                *history = validateHistory(history);
-            }
-            else
-            {
+            if (((*game_state) -> player == 2) && (aiOpponent == 1) && (boardSize > 3)){
+                int validMove = 0;
+                while (validMove == 0){
+                    int row = rand() % boardSize;
+                    int column = rand() % boardSize;
+                    if ((*game_state) -> board[row][column] == 0){
+                        (*game_state) -> board[row][column] = (*game_state) -> player;
+                        validMove = 1;
+                    }
+                }
+            }else{
 
-                printf("that square is occupied, choose another square\n");
-                continue;
+                printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
+                scanf("%d%d", &x, &y);
+            
+                square = &((*game_state) -> board[x-1][y-1]);
+                if (*square == 0){
+                    *history = validateHistory(history);
+                    *square = (*game_state) ->player; //change value of board to whatever player's shot it is
+                }
+                else
+                {
+
+                    printf("that square is occupied, choose another square\n");
+                    continue;
+                }
             }
         }
 
-        *square = (*game_state) ->player; //change value of board to whatever player's shot it is
+       
         //mark who's turn it is next 
         if ((*game_state)->player == 1)
         {
