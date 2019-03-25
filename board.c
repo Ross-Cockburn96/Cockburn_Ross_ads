@@ -14,7 +14,8 @@
 char p1[3][25] = {" o o o ", " o   o ", " o o o "};
 char p2[3][25] = {" x   x ", "   x   ", " x   x "};
 int boardSize;
-
+int player1Score = 0;
+int player2Score = 0;
 int main(void)
 {
     struct state *game_state;
@@ -23,21 +24,30 @@ int main(void)
     gameHistory = (struct moveHistory **) malloc(sizeof(struct moveHistory*));
     int games = 0;
     char response[2] = "";
+    int aiOpponent = 0;
     history = NULL;
     game_state = NULL;
 
     printf("enter size of board\n");
     scanf("%d", &boardSize);
+    if (boardSize <= 3){
+        printf("do you want to play against AI?(y/n)");
+        scanf("%s", response );
+        if (strcmp(response, "y") ==0){
+            aiOpponent = 1;
+        }
+    }
     initialiseState(&game_state);
     initialiseHistory(&history);
     system("cls");
+    printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
     printBoard(game_state);
-    start(&game_state, &history );
+    start(&game_state, &history, aiOpponent );
     printf("end of game\n");
-    while (strcmp(response, "n") != 0){
+    while (strcmp(response, "q") != 0){
         gameHistory[games] = (struct moveHistory *)malloc (sizeof(struct moveHistory));
         gameHistory[games] = &(*history);
-        printf("play again?(y/n)\n");
+        printf("play again?(y/n) or q to quit\n");
         scanf("%s", response);
 
         if (strcmp(response, "y") == 0){
@@ -50,8 +60,10 @@ int main(void)
             history = NULL;
             initialiseHistory(&history);
             system("cls");
+            printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
             printBoard(game_state);
-            start(&game_state, &history);
+            start(&game_state, &history, aiOpponent);
+            games++;
         }else{
             if (strcmp(response, "n") == 0){
                 char resp[2] = "";
@@ -72,7 +84,7 @@ int main(void)
                
             }
         }
-        games++;
+        
     }
     return 0;
 }
@@ -84,17 +96,19 @@ void replayHistory(struct moveHistory *gameHistory){
     while (gameHistory -> next != NULL){
         Sleep(1000);
         system("cls");
+        printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
         printBoard(gameHistory -> current_state);
         gameHistory = gameHistory -> next;
         
     }
     Sleep(1000);
     system("cls");
+    printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
     printBoard(gameHistory -> current_state);
     
 }
 
-void start(struct state **game_state, struct moveHistory ** history)
+void start(struct state **game_state, struct moveHistory ** history, int aiOpponent)
 {
     int finished = FALSE;
     int x, y;
@@ -102,7 +116,7 @@ void start(struct state **game_state, struct moveHistory ** history)
     char ans[2];
     while (finished == FALSE)
     {
-        if (((*game_state) -> player ==2) && (boardSize <= 3)){
+        if (((*game_state) -> player ==2) && (aiOpponent == 1)){
             *game_state = minmax((*game_state), (*game_state)->player);
         }else{
             printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
@@ -116,6 +130,7 @@ void start(struct state **game_state, struct moveHistory ** history)
             {
 
                 printf("that square is occupied, choose another square\n");
+                continue;
             }
         }
 
@@ -135,7 +150,13 @@ void start(struct state **game_state, struct moveHistory ** history)
         {
             system("cls");
             printf("player %d wins\n", (*history)->prev->current_state->player);
+            if ((*history) -> prev -> current_state -> player == 1){
+                player1Score++;
+            }else{
+                player2Score++;
+            }
             finished = TRUE;
+            printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
             printBoard((*game_state));
             break;
         }
@@ -144,20 +165,20 @@ void start(struct state **game_state, struct moveHistory ** history)
             system("cls");
             printf("draw\n");
             finished = TRUE;
+            printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
             printBoard((*game_state));
             break;
         }
         
         system("cls");
+        printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
         printBoard((*game_state));
         printf ("Would you like to enter rewind mode?\n y/n ");
         scanf ("%s", ans);
         if (strcmp(ans, "y") ==0){
             rewindState(game_state, history);
         }
-            
-
-        }
+    }
 
     printf("FINISHED\n");
 }
@@ -173,12 +194,14 @@ void rewindState(struct state **game_state, struct moveHistory **move_history)
             undo(game_state, move_history);
             printf("player is now %d\n", (*game_state) -> player);
             system("cls");
+            printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
             printBoard((*game_state));
         }
         if (strcmp(c, "R") == 0){
             redo(game_state, move_history);
             printf("player is now %d\n", (*game_state) -> player);
             system("cls");
+            printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
             printBoard((*game_state));
         }
         if (strcmp(c, "F") ==0){
