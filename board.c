@@ -30,14 +30,14 @@ int main(void)
     scanf("%d", &boardSize);
     initialiseState(&game_state);
     initialiseHistory(&history);
-    //system("cls");
+    system("cls");
     printBoard(game_state);
     start(&game_state, &history );
     printf("end of game\n");
     while (strcmp(response, "n") != 0){
         gameHistory[games] = (struct moveHistory *)malloc (sizeof(struct moveHistory));
         gameHistory[games] = &(*history);
-        printf("play again?\n");
+        printf("play again?(y/n)\n");
         scanf("%s", response);
 
         if (strcmp(response, "y") == 0){
@@ -56,7 +56,7 @@ int main(void)
             if (strcmp(response, "n") == 0){
                 char resp[2] = "";
                 while (strcmp(resp, "n")!=0){
-                    printf("do you want to replay a previous game?\n");
+                    printf("do you want to replay a previous game?(y/n)\n");
                     scanf("%s", resp);
                     if (strcmp(resp, "y") == 0){
                         int gameNum = 0;
@@ -102,12 +102,8 @@ void start(struct state **game_state, struct moveHistory ** history)
     char ans[2];
     while (finished == FALSE)
     {
-        if ((*game_state) -> player ==2){
+        if (((*game_state) -> player ==2) && (boardSize <= 3)){
             *game_state = minmax((*game_state), (*game_state)->player);
-            printf("finished");
-            (*game_state) -> player =1;
-            updateHistory (history, (*game_state));
-            printBoard((*game_state));
         }else{
             printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
             scanf("%d%d", &x, &y);
@@ -115,45 +111,6 @@ void start(struct state **game_state, struct moveHistory ** history)
             square = &((*game_state) -> board[x-1][y-1]);
             if (*square == 0){
                 *history = validateHistory(history);
-
-                *square = (*game_state) ->player; //change value of board to whatever player's shot it is
-                //mark who's turn it is next 
-                if ((*game_state)->player == 1)
-                {
-                    (*game_state)->player = 2;
-                }
-                else
-                {
-                    (*game_state)->player = 1;
-                }
-                updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
-                int moveEffect = gameFinished((*game_state), (*history)->prev->current_state->player);
-                if (moveEffect == 1)
-                {
-                    system("cls");
-                    printf("player %d wins\n", (*history)->prev->current_state->player);
-                    finished = TRUE;
-                    printBoard((*game_state));
-                    break;
-                }
-                if (moveEffect == 2)
-                {   
-                    system("cls");
-                    printf("draw\n");
-                    finished = TRUE;
-                    printBoard((*game_state));
-                    break;
-                }
-                
-                //system("cls");
-                printBoard((*game_state));
-                printf ("Would you like to enter rewind mode?\n y/n ");
-                scanf ("%s", ans);
-                if (strcmp(ans, "y") ==0){
-                    rewindState(game_state, history);
-                }
-                
-
             }
             else
             {
@@ -162,7 +119,46 @@ void start(struct state **game_state, struct moveHistory ** history)
             }
         }
 
-    }
+        *square = (*game_state) ->player; //change value of board to whatever player's shot it is
+        //mark who's turn it is next 
+        if ((*game_state)->player == 1)
+        {
+            (*game_state)->player = 2;
+        }
+        else
+        {
+            (*game_state)->player = 1;
+        }
+        updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
+        int moveEffect = gameFinished((*game_state), (*history)->prev->current_state->player);
+        if (moveEffect == 1)
+        {
+            system("cls");
+            printf("player %d wins\n", (*history)->prev->current_state->player);
+            finished = TRUE;
+            printBoard((*game_state));
+            break;
+        }
+        if (moveEffect == 2)
+        {   
+            system("cls");
+            printf("draw\n");
+            finished = TRUE;
+            printBoard((*game_state));
+            break;
+        }
+        
+        system("cls");
+        printBoard((*game_state));
+        printf ("Would you like to enter rewind mode?\n y/n ");
+        scanf ("%s", ans);
+        if (strcmp(ans, "y") ==0){
+            rewindState(game_state, history);
+        }
+            
+
+        }
+
     printf("FINISHED\n");
 }
 
@@ -176,11 +172,13 @@ void rewindState(struct state **game_state, struct moveHistory **move_history)
         if (strcmp(c, "U") ==0){
             undo(game_state, move_history);
             printf("player is now %d\n", (*game_state) -> player);
+            system("cls");
             printBoard((*game_state));
         }
         if (strcmp(c, "R") == 0){
             redo(game_state, move_history);
             printf("player is now %d\n", (*game_state) -> player);
+            system("cls");
             printBoard((*game_state));
         }
         if (strcmp(c, "F") ==0){
@@ -436,7 +434,10 @@ void freeBoard(int **board){
     for (i = 0; i < boardSize; i++){
         free(board[i]);
     }
-    free (board);
+    if (board != NULL){
+         free (board);
+    }
+   
 }
 
 void deepIntCopy(int **newBoard, int **oldBoard){
@@ -444,6 +445,14 @@ void deepIntCopy(int **newBoard, int **oldBoard){
      for (i = 0; i < boardSize; i++){
         for (j = 0; j < boardSize; j ++){
             newBoard[i][j] = oldBoard[i][j];
+        }
+    }
+}
+
+void printGameBoard(int ** board){
+    for (int i = 0; i < boardSize; i ++){
+        for (int j = 0; j < boardSize; j ++){
+            printf("%d", board[i][j]);
         }
     }
 }
