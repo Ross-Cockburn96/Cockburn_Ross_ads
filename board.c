@@ -11,7 +11,6 @@
 #define TRUE 1
 #define FALSE 0
 
-
 char p1[3][25] = {" o o o ", " o   o ", " o o o "};
 char p2[3][25] = {" x   x ", "   x   ", " x   x "};
 int boardSize;
@@ -23,7 +22,7 @@ int main(void)
     struct moveHistory *history;
     struct moveHistory **gameHistory;
     srand(time(NULL));
-    gameHistory = (struct moveHistory **) malloc(sizeof(struct moveHistory*));
+    gameHistory = (struct moveHistory **)malloc(sizeof(struct moveHistory *));
     int games = 0;
     char response[2] = "";
     int aiOpponent = 0;
@@ -34,8 +33,9 @@ int main(void)
     scanf("%d", &boardSize);
 
     printf("do you want to play against AI?(y/n)");
-    scanf("%s", response );
-    if (strcmp(response, "y") ==0){
+    scanf("%s", response);
+    if (strcmp(response, "y") == 0)
+    {
         aiOpponent = 1;
     }
 
@@ -44,21 +44,23 @@ int main(void)
     system("cls");
     printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
     printBoard(game_state);
-    start(&game_state, &history, aiOpponent );
+    start(&game_state, &history, aiOpponent);
     printf("end of game\n");
-    while (strcmp(response, "q") != 0){
-        gameHistory[games] = (struct moveHistory *)malloc (sizeof(struct moveHistory));
+    while (strcmp(response, "q") != 0)
+    {
+        gameHistory[games] = (struct moveHistory *)malloc(sizeof(struct moveHistory));
         gameHistory[games] = &(*history);
         printf("play again?(y/n) or q to quit\n");
         scanf("%s", response);
 
-        if (strcmp(response, "y") == 0){
+        if (strcmp(response, "y") == 0)
+        {
             //delete the game board and create a new one
-            freeBoard(game_state -> board);
+            freeBoard(game_state->board);
             int **newBoard = NULL;
-            game_state -> board = initBoard(newBoard);
-            game_state -> player = 1;
-            //don't free history space as it is being used by the gameHistory for game replaying 
+            game_state->board = initBoard(newBoard);
+            game_state->player = 1;
+            //don't free history space as it is being used by the gameHistory for game replaying
             history = NULL;
             initialiseHistory(&history);
             system("cls");
@@ -66,51 +68,56 @@ int main(void)
             printBoard(game_state);
             start(&game_state, &history, aiOpponent);
             games++;
-        }else{
-            if (strcmp(response, "n") == 0){
+        }
+        else
+        {
+            if (strcmp(response, "n") == 0)
+            {
                 char resp[2] = "";
-                while (strcmp(resp, "n")!=0){
+                while (strcmp(resp, "n") != 0)
+                {
                     printf("do you want to replay a previous game?(y/n)\n");
                     scanf("%s", resp);
-                    if (strcmp(resp, "y") == 0){
+                    if (strcmp(resp, "y") == 0)
+                    {
                         int gameNum = 0;
                         printf("enter the number of the game you want to replay\n");
-                        for (int i = 0; i <= games; i++){
-                            printf("game %d\n", i+1);
+                        for (int i = 0; i <= games; i++)
+                        {
+                            printf("game %d\n", i + 1);
                         }
-                    scanf("%d", &gameNum);
-                    gameNum --;
-                    replayHistory(gameHistory[gameNum]);
+                        scanf("%d", &gameNum);
+                        gameNum--;
+                        replayHistory(gameHistory[gameNum]);
                     }
                 }
-               
             }
         }
-        
     }
     return 0;
 }
 
-void replayHistory(struct moveHistory *gameHistory){
-    while (gameHistory -> prev != NULL){
-        gameHistory = gameHistory -> prev;
+void replayHistory(struct moveHistory *gameHistory)
+{
+    while (gameHistory->prev != NULL)
+    {
+        gameHistory = gameHistory->prev;
     }
-    while (gameHistory -> next != NULL){
+    while (gameHistory->next != NULL)
+    {
         Sleep(1000);
         system("cls");
         printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
-        printBoard(gameHistory -> current_state);
-        gameHistory = gameHistory -> next;
-        
+        printBoard(gameHistory->current_state);
+        gameHistory = gameHistory->next;
     }
     Sleep(1000);
     system("cls");
     printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
-    printBoard(gameHistory -> current_state);
-    
+    printBoard(gameHistory->current_state);
 }
 
-void start(struct state **game_state, struct moveHistory ** history, int aiOpponent)
+void start(struct state **game_state, struct moveHistory **history, int aiOpponent)
 {
     int finished = FALSE;
     int x, y;
@@ -118,28 +125,37 @@ void start(struct state **game_state, struct moveHistory ** history, int aiOppon
     char ans[2];
     while (finished == FALSE)
     {
-        if (((*game_state) -> player ==2) && (aiOpponent == 1) && (boardSize <= 3)){
+        if (((*game_state)->player == 2) && (aiOpponent == 1) && (boardSize <= 3))
+        {
             *game_state = minmax((*game_state), (*game_state)->player);
-        }else{
-            if (((*game_state) -> player == 2) && (aiOpponent == 1) && (boardSize > 3)){
+        }
+        else
+        {
+            if (((*game_state)->player == 2) && (aiOpponent == 1) && (boardSize > 3))
+            {
                 int validMove = 0;
-                while (validMove == 0){
+                while (validMove == 0)
+                {
                     int row = rand() % boardSize;
                     int column = rand() % boardSize;
-                    if ((*game_state) -> board[row][column] == 0){
-                        (*game_state) -> board[row][column] = (*game_state) -> player;
+                    if ((*game_state)->board[row][column] == 0)
+                    {
+                        (*game_state)->board[row][column] = (*game_state)->player;
                         validMove = 1;
                     }
                 }
-            }else{
+            }
+            else
+            {
 
                 printf("player %d, enter your move, grid is %d by %d enter [row] [column]\n", (*game_state)->player, boardSize, boardSize);
                 scanf("%d%d", &x, &y);
-            
-                square = &((*game_state) -> board[x-1][y-1]);
-                if (*square == 0){
+
+                square = &((*game_state)->board[x - 1][y - 1]);
+                if (*square == 0)
+                {
                     *history = validateHistory(history);
-                    *square = (*game_state) ->player; //change value of board to whatever player's shot it is
+                    *square = (*game_state)->player; //change value of board to whatever player's shot it is
                 }
                 else
                 {
@@ -150,8 +166,7 @@ void start(struct state **game_state, struct moveHistory ** history, int aiOppon
             }
         }
 
-       
-        //mark who's turn it is next 
+        //mark who's turn it is next
         if ((*game_state)->player == 1)
         {
             (*game_state)->player = 2;
@@ -160,15 +175,18 @@ void start(struct state **game_state, struct moveHistory ** history, int aiOppon
         {
             (*game_state)->player = 1;
         }
-        updateHistory (history, (*game_state)); //updates history with the current state before changing the state with user's turn
+        updateHistory(history, (*game_state)); //updates history with the current state before changing the state with user's turn
         int moveEffect = gameFinished((*game_state), (*history)->prev->current_state->player);
         if (moveEffect == 1)
         {
             system("cls");
             printf("player %d wins\n", (*history)->prev->current_state->player);
-            if ((*history) -> prev -> current_state -> player == 1){
+            if ((*history)->prev->current_state->player == 1)
+            {
                 player1Score++;
-            }else{
+            }
+            else
+            {
                 player2Score++;
             }
             finished = TRUE;
@@ -177,7 +195,7 @@ void start(struct state **game_state, struct moveHistory ** history, int aiOppon
             break;
         }
         if (moveEffect == 2)
-        {   
+        {
             system("cls");
             printf("draw\n");
             finished = TRUE;
@@ -185,13 +203,14 @@ void start(struct state **game_state, struct moveHistory ** history, int aiOppon
             printBoard((*game_state));
             break;
         }
-        
+
         system("cls");
         printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
         printBoard((*game_state));
-        printf ("Would you like to enter rewind mode?\n y/n ");
-        scanf ("%s", ans);
-        if (strcmp(ans, "y") ==0){
+        printf("Would you like to enter rewind mode?\n y/n ");
+        scanf("%s", ans);
+        if (strcmp(ans, "y") == 0)
+        {
             rewindState(game_state, history);
         }
     }
@@ -203,74 +222,92 @@ void rewindState(struct state **game_state, struct moveHistory **move_history)
 {
     char c[3];
     int finished = FALSE;
-    while (finished == FALSE){
-        printf ("Enter R to redo, U to undo a move and F to finish");
-        scanf ("%s", c);
-        if (strcmp(c, "U") ==0){
+    while (finished == FALSE)
+    {
+        printf("Enter R to redo, U to undo a move and F to finish");
+        scanf("%s", c);
+        if (strcmp(c, "U") == 0)
+        {
             undo(game_state, move_history);
-            printf("player is now %d\n", (*game_state) -> player);
+            printf("player is now %d\n", (*game_state)->player);
             system("cls");
             printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
             printBoard((*game_state));
         }
-        if (strcmp(c, "R") == 0){
+        if (strcmp(c, "R") == 0)
+        {
             redo(game_state, move_history);
-            printf("player is now %d\n", (*game_state) -> player);
+            printf("player is now %d\n", (*game_state)->player);
             system("cls");
             printf("Player 1 - %d : %d - Player 2", player1Score, player2Score);
             printBoard((*game_state));
         }
-        if (strcmp(c, "F") ==0){
+        if (strcmp(c, "F") == 0)
+        {
             finished = TRUE;
         }
     }
-
 }
 
-void undo(struct state **game_state, struct moveHistory **move_history){
+void undo(struct state **game_state, struct moveHistory **move_history)
+{
     struct state *prevState;
-    if ((*move_history) -> prev != NULL){
-        prevState = (*move_history) -> prev -> current_state;
-        *move_history = (*move_history) -> prev;
-        deepIntCopy((*game_state) -> board, prevState -> board);
-        (*game_state) -> player = prevState -> player;
-    }else{
+    if ((*move_history)->prev != NULL)
+    {
+        prevState = (*move_history)->prev->current_state;
+        *move_history = (*move_history)->prev;
+        deepIntCopy((*game_state)->board, prevState->board);
+        (*game_state)->player = prevState->player;
+    }
+    else
+    {
         printf("NO MOVES TO UNDO\n");
     }
-    
 }
 
-void redo(struct state **game_state, struct moveHistory **move_history){
+void redo(struct state **game_state, struct moveHistory **move_history)
+{
     struct state *nextState;
-    if ((*move_history) -> next != NULL){
-        nextState = (*move_history) -> next -> current_state;
-        *move_history = (*move_history) -> next;
-        deepIntCopy((*game_state) -> board, nextState -> board);
-        (*game_state) -> player = nextState -> player;
-    }else{
+    if ((*move_history)->next != NULL)
+    {
+        nextState = (*move_history)->next->current_state;
+        *move_history = (*move_history)->next;
+        deepIntCopy((*game_state)->board, nextState->board);
+        (*game_state)->player = nextState->player;
+    }
+    else
+    {
         printf("NO MOVES TO REDO\n");
     }
-    
 }
 int gameFinished(struct state *gameState, int player)
 {
-    if (checkRows(gameState, player ) == TRUE)
+    if (checkRows(gameState, player) == TRUE)
     {
         return 1;
     }
     else
     {
-        if (checkColumns(gameState, player ) == TRUE)
+        if (checkColumns(gameState, player) == TRUE)
         {
             return 1;
         }
         else
         {
-            if (checkDiagonals(gameState, player ) == TRUE)
+            if (checkDiagonals(gameState, player) == TRUE)
             {
                 return 1;
             }
-            return 0;
+            int boardFull = 1; 
+            for (int i = 0; i < boardSize; i++){
+                for (int j = 0; j < boardSize; j ++){
+                    if (gameState -> board[i][j] == 0){
+                        boardFull = 0;
+                        return 0;
+                    }
+                }
+            }
+            return 2;
         }
     }
 }
@@ -288,20 +325,16 @@ int checkRows(struct state *gameState, int player)
         {
             continue; //if the first marker on the row is empty skip to the next row.
         }
-        //printf("marker is %d\n", marker);
         matchCount = 0; //this will be equal to the size of the board if there is a winning row
         for (j = 0; j < boardSize; j++)
         {
             if (*(*(ptr + i) + j) != marker)
             { //this is each element in the row
-                //printf("%d is not = to marker\n" ,*(*(ptr + i)+j) );
                 break; //if one of the elements is not equal to the marker then there is no point checking the rest in this row
             }
             else
             {
-                //printf("value %d is = to marker\n", *(*(ptr+i)+j));
                 matchCount++;
-                //printf("%d is number of matches\n", matchCount);
             }
             if (matchCount == boardSize)
             {
@@ -353,7 +386,7 @@ int checkDiagonals(struct state *gameState, int player)
     marker = **(ptr); //marker is the top left marker on board
     if (marker != 0 && marker == player)
     {
-        matchCount =0;
+        matchCount = 0;
         for (i = 0; i < boardSize; i++)
         {
             if (*(*(ptr + i) + i) != marker) //check the left -> right diagonal
@@ -370,13 +403,13 @@ int checkDiagonals(struct state *gameState, int player)
             }
         }
     }
-    marker = *(*(ptr)+boardSize-1); //marker is top right marker on board
+    marker = *(*(ptr) + boardSize - 1); //marker is top right marker on board
     if (marker != 0 && marker == player)
     {
-        matchCount =0;
-        for (i=0; i<boardSize; i++)
+        matchCount = 0;
+        for (i = 0; i < boardSize; i++)
         {
-            if (*(*(ptr + i) +boardSize-(i+1)) != marker) //check the right -> left diagonal
+            if (*(*(ptr + i) + boardSize - (i + 1)) != marker) //check the right -> left diagonal
             {
                 break;
             }
@@ -392,7 +425,6 @@ int checkDiagonals(struct state *gameState, int player)
     }
 
     return FALSE;
-
 }
 //creates a visual board in the terminal based on the size input the user has given
 void printBoard(struct state *game_state)
@@ -400,7 +432,7 @@ void printBoard(struct state *game_state)
     printf("\n\n");
     int i, boardCount = 0;
     char line[9] = "--------";
-    for (i = 0; i < (boardSize * 4) - 1; i++)
+    for (i = 0; i < (boardSize * 4) - 1; i++) //multiplied by 4 because there are 4 rows of output to every square 
     { //i represents each row of output
         int j;
         if (i % 4 == 0 && i != 0)
@@ -451,46 +483,59 @@ void initialiseState(struct state **game_state)
 {
     *game_state = (struct state *)malloc(sizeof(game_state));
     (*game_state)->player = 1;
-    (*game_state)->board = initBoard((*game_state) -> board);
+    (*game_state)->board = initBoard((*game_state)->board);
 }
 
-int **initBoard (int **board){
-    int i,j;
-    board = (int **) malloc(boardSize * sizeof(int *));
+int **initBoard(int **board)
+{
+    int i, j;
+    board = (int **)malloc(boardSize * sizeof(int *));
     for (i = 0; i < boardSize; i++)
     {
-        board[i] = (int *) malloc (boardSize * sizeof(int));
-        for (j=0; j< boardSize; j++){
+        board[i] = (int *)malloc(boardSize * sizeof(int));
+        for (j = 0; j < boardSize; j++)
+        {
             board[i][j] = 0;
         }
     }
-   return board;
+    return board;
 }
 
 //function to free the allocated space of a game board
-void freeBoard(int **board){
+void freeBoard(int **board)
+{
     int i;
-    for (i = 0; i < boardSize; i++){
+    for (i = 0; i < boardSize; i++)
+    {
         free(board[i]);
+        printf("free %d ", i);
     }
-    if (board != NULL){
-         free (board);
+    if (board != NULL)
+    {   
+        printf("free rest");
+        free(board);
+        printf("freed");
     }
-   
 }
 
-void deepIntCopy(int **newBoard, int **oldBoard){
-    int i,j;
-     for (i = 0; i < boardSize; i++){
-        for (j = 0; j < boardSize; j ++){
+void deepIntCopy(int **newBoard, int **oldBoard)
+{
+    int i, j;
+    for (i = 0; i < boardSize; i++)
+    {
+        for (j = 0; j < boardSize; j++)
+        {
             newBoard[i][j] = oldBoard[i][j];
         }
     }
 }
 
-void printGameBoard(int ** board){
-    for (int i = 0; i < boardSize; i ++){
-        for (int j = 0; j < boardSize; j ++){
+void printIntArray(int **board)
+{
+    for (int i = 0; i < boardSize; i++)
+    {
+        for (int j = 0; j < boardSize; j++)
+        {
             printf("%d", board[i][j]);
         }
     }

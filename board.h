@@ -17,6 +17,6 @@ int **initBoard(int **);
 void freeBoard(int **);
 void deepIntCopy(int **, int **);
 void replayHistory(struct moveHistory *);
-void printGameBoard(int **);
+void printIntArray(int **);
 
 #endif

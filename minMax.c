@@ -27,6 +27,7 @@ struct state * minmax(struct state *gameState, int player){
             }
         }
     }
+
     //for each space on the board that is empty, try placing a marker on it
     int result;
     int bestScore; 
